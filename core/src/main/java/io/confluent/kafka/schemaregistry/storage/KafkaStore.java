@@ -192,9 +192,11 @@ public class KafkaStore<K, V> implements Store<K, V> {
     }
 
     if (numLiveBrokers < desiredReplicationFactor) {
-      throw new StoreInitializationException(String.format("Not enough brokers to satisfy desired replication factor: %s", desiredReplicationFactor));
+      throw new StoreInitializationException("Not enough brokers to satisfy " 
+                                             + "the desired replication factor: "
+                                             + desiredReplicationFactor);
     }
-
+    
     int schemaTopicReplicationFactor = Math.min(numLiveBrokers, desiredReplicationFactor);
     if (schemaTopicReplicationFactor < desiredReplicationFactor) {
       log.warn("Creating the schema topic "
