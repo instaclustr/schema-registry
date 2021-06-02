@@ -131,7 +131,7 @@ public class KafkaStore<K, V> implements Store<K, V> {
     this.kafkaTopicReader =
         new KafkaStoreReaderThread<>(this.bootstrapBrokers, topic, groupId,
                                      this.storeUpdateHandler, serializer, this.localStore,
-                                     this.noopKey, this.config);
+                                     this.producer, this.noopKey, this.config);
     this.kafkaTopicReader.start();
 
     try {
@@ -191,6 +191,12 @@ public class KafkaStore<K, V> implements Store<K, V> {
         .get(initTimeout, TimeUnit.MILLISECONDS).size();
     if (numLiveBrokers <= 0) {
       throw new StoreInitializationException("No live Kafka brokers");
+    }
+
+    if (numLiveBrokers < desiredReplicationFactor) {
+      throw new StoreInitializationException("Not enough brokers to satisfy "
+              + "the desired replication factor: "
+              + desiredReplicationFactor);
     }
 
     int schemaTopicReplicationFactor = Math.min(numLiveBrokers, desiredReplicationFactor);
